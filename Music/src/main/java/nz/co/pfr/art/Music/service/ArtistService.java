@@ -1,13 +1,16 @@
 package nz.co.pfr.art.Music.service;
 
-import nz.co.pfr.art.Music.entities.ArtistRepository;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import nz.co.pfr.art.Music.entities.ArtistRepository;
 
 @Service
 public class ArtistService {
@@ -23,6 +26,7 @@ public class ArtistService {
         var artists = artistRepository.findAll();
 
         var artistTrackCountMap = new HashMap<String, Integer>();
+        
         for(int i = 0; i < artists.size(); i++) {
             var artist = artists.get(i);
             log.info("artist name {} cds {}", artist.getName(), artist.getCds().size());
@@ -37,24 +41,21 @@ public class ArtistService {
             artistTrackCountMap.put(artist.getName(), trackCount);
 
         }
-        int highest = 0;
-        var mostProductiveArtists = new ArrayList<String>();
-
-        for(var artist : artistTrackCountMap.keySet()) {
-            var totalTrackCount = artistTrackCountMap.get(artist);
-            if (highest < totalTrackCount) {
-                highest = totalTrackCount;
-                mostProductiveArtists.clear();
-                mostProductiveArtists.add(artist);
-            } else if (highest == totalTrackCount) {
-                mostProductiveArtists.add(artist);
-            }
-            log.info("artist: {} total tracks: {}", artist, artistTrackCountMap.get(artist));
+        List<String> mostProductiveArtists = new ArrayList();                 
+        var entryList = new ArrayList<Entry<String, Integer>>(artistTrackCountMap.entrySet());
+        entryList.sort((a1, a2) -> a2.getValue().compareTo(a1.getValue()));
+        
+        Iterator<Entry<String, Integer>> iter = entryList.iterator();
+        
+        int icnt = 1;
+        while(iter.hasNext() && icnt <= topn ) {
+        	icnt++;
+        	Entry<String, Integer> entry = iter.next();
+        	mostProductiveArtists.add(entry.getKey());
         }
-        log.info("most productive artist is: {}", mostProductiveArtists);
 
-
-        return mostProductiveArtists.subList(0, topn);
+        log.info("most productive artist list is: {}", mostProductiveArtists);
+        return mostProductiveArtists;
     }
     
     public List<String> getMostProductiveArtistsSQL(Integer topn) {
