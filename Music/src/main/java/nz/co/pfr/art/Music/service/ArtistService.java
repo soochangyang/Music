@@ -56,6 +56,10 @@ public class ArtistService {
 
         return mostProductiveArtists.subList(0, topn);
     }
+    
+    public List<String> getMostProductiveArtistsSQL(Integer topn) {
+    	return artistRepository.findTopList(topn);
+    }
 
 
 }
